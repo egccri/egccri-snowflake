@@ -3,9 +3,24 @@ mod generator;
 mod server;
 
 use clap::Parser;
+use tonic::transport::Server;
+use server::grpc::SnowflakeGrpcService;
+use server::grpc::snowflake_grpc::snowflake_service_server::SnowflakeServiceServer;
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // generator::snowflake::snowflake_zookeeper_holder::init();
+
+    let addr = "[::1]:50051".parse()?;
+    let snowflake_service = SnowflakeGrpcService::default();
+
+    Server::builder()
+        .add_service(SnowflakeServiceServer::new(snowflake_service))
+        .serve(addr)
+        .await?;
+
+    Ok(())
+
 
     // let args = Args::parse();
     // println!("{:?}", args);

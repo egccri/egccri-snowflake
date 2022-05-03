@@ -1,0 +1,21 @@
+syntax = "proto3";
+package snowflake_grpc;
+
+service SnowflakeService {
+    rpc getId (IdRequest) returns (IdReply);
+    rpc getIds (IdsRequest) returns (IdsReply);
+}
+
+message IdRequest {}
+
+message IdReply {
+    sint64 message = 1;
+}
+
+message IdsRequest {
+    sint32 step = 1;
+}
+
+message IdsReply {
+    sint64 message = 1;
+}
