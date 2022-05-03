@@ -5,6 +5,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use zookeeper::{Acl, CreateMode, WatchedEvent, Watcher, ZooKeeper};
 
 struct LoggingWatcher;
+
 impl Watcher for LoggingWatcher {
     fn handle(&self, e: WatchedEvent) {
         info!("{:?}", e)

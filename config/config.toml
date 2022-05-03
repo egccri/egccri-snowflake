@@ -1,12 +1,15 @@
 [snowflake]
-zookeeper-server=127.0.0.1:2181
+zookeeper-server = "127.0.0.1:2181"
 # 0-31
-zone-id=0
-work-id=0
+zone-id = 0
+work-id = 0
 # 1或者10，也就是每多少ms到下一个时间段，1的话是41bits，10的话是39bits
 # timestamp-unit-ms=1
 # start-time=
-machine-id-bits=10
-sequence-bits=12
+machine-id-bits = 10
+sequence-bits = 12
 
-[server]
+[server.grpc]
+
+[server.http]
+

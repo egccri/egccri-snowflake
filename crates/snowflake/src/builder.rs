@@ -1,15 +1,17 @@
-use std::error::Error;
+use crate::error::{BoxDynError, SnowflakeError};
+use crate::snowflake::Internals;
+use crate::snowflake::Snowflake;
+use crate::ShareSnowFlake;
+use chrono::{DateTime, Utc};
 use std::sync::Mutex;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
-use crate::error::{BoxDynError, SnowFlakeError};
-use crate::snowflake::SnowFlake;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Builder<'a> {
-    start_time: Option<SystemTime>,
-    machine_id: Option<&'a dyn Fn() -> Result<u16, BoxDynError>>,
+    start_time: Option<i64>,
+    machine_id: Option<&'a dyn Fn() -> Result<i16, BoxDynError>>,
 }
 
-impl <'a> Builder<'a> {
+impl<'a> Builder<'a> {
     pub fn new() -> Self {
         Self {
             start_time: None,
@@ -17,8 +19,9 @@ impl <'a> Builder<'a> {
         }
     }
 
-    pub fn start_time(mut self, start_time: SystemTime) -> Self {
-        self.start_time = Some(start_time);
+    pub fn start_time(mut self, start_time: &str) -> Self {
+        let datetime = DateTime::parse_from_str(start_time, "%Y-%m-%d %H:%M:%S %z");
+        self.start_time = Some(datetime.unwrap().timestamp_millis());
         self
     }
 
@@ -27,31 +30,41 @@ impl <'a> Builder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<SnowFlake, SnowFlakeError> {
-
-       let start_time = if let Some(start_time) = self.start_time {
-           let ms = SystemTime::now().duration_since(start_time).unwrap().as_millis();
-           if ms > 0 {
-               return Err(SnowFlakeError::StartTimeAheadOfCurrentTime(start_time));
-           }
-           ms as i64
-       } else {
-           SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_millis() as i64
-       };
+    pub fn build(self) -> Result<ShareSnowFlake, SnowflakeError> {
+        let start_time = if let Some(start_time) = self.start_time {
+            let current = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_millis() as i64;
+            if (current - start_time) < 0 {
+                return Err(SnowflakeError::StartTimeAheadOfCurrentTime(
+                    // DateTime::from_utc(Utc.timestamp_millis(start_time), 8).to_string(),
+                    start_time.to_string(),
+                ));
+            }
+            start_time
+        } else {
+            DateTime::parse_from_str("2020-01-01 00:00:00 +08:00", "%Y-%m-%d %H:%M:%S %z")
+                .unwrap()
+                .timestamp_millis()
+        };
 
         let machine_id = if let Some(machine_id) = self.machine_id {
             match machine_id() {
                 Ok(machine_id) => machine_id,
-                Err(e) => return Err(Error::MachineIdFailed(e)),
+                Err(e) => return Err(SnowflakeError::MachineIdFailed(e)),
             }
         } else {
-
+            0_i16
         };
 
-        Ok(SnowFlake {
+        Ok(ShareSnowFlake::new(Snowflake {
             start_time,
-            machine_id: 0,
-            internals: Mutex::new(Internals {})
-        })
+            machine_id: machine_id,
+            internals: Mutex::new(Internals {
+                elapsed_time: 0,
+                sequence: 0,
+            }),
+        }))
     }
 }
