@@ -2,10 +2,12 @@ use tonic::{transport::Server, Request, Response, Status};
 
 use snowflake_grpc::snowflake_service_server::{SnowflakeService, SnowflakeServiceServer};
 use snowflake_grpc::{IdRequest, IdReply, IdsRequest, IdsReply};
+use crate::generator::custom::CustomSnowflake;
+use crate::server::Service;
 
 
 pub mod snowflake_grpc {
-    tonic::include_proto!("snowflake_grpc"); // The string specified here must match the proto package name
+    include!(concat!(env!("OUT_DIR"), "/snowflake_grpc.rs")); // The string specified here must match the proto package name
 }
 
 #[derive(Debug, Default)]
@@ -21,7 +23,7 @@ impl SnowflakeService for SnowflakeGrpcService {
         println!("Got a request: {:?}", request);
 
         let reply = snowflake_grpc::IdReply {
-            message: 1, // We must use .into_inner() as the fields of gRPC requests and responses are private
+            message: CustomSnowflake::next_id(), // We must use .into_inner() as the fields of gRPC requests and responses are private
         };
 
         Ok(Response::new(reply)) // Send back our formatted greeting
