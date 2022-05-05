@@ -17,5 +17,5 @@ message IdsRequest {
 }
 
 message IdsReply {
-    sint64 message = 1;
+    repeated IdReply message = 1;
 }
