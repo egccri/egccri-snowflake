@@ -6,12 +6,12 @@ use chrono::{DateTime, Utc};
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub struct Builder<'a> {
+pub struct Builder {
     start_time: Option<i64>,
-    machine_id: Option<&'a dyn Fn() -> Result<i16, BoxDynError>>,
+    machine_id: Option<i32>,
 }
 
-impl<'a> Builder<'a> {
+impl Builder {
     pub fn new() -> Self {
         Self {
             start_time: None,
@@ -25,8 +25,8 @@ impl<'a> Builder<'a> {
         self
     }
 
-    pub fn machine_id(mut self, machine_id: &'a dyn Fn() -> Result<i16, BoxDynError>) -> Self {
-        self.machine_id = Some(machine_id);
+    pub fn machine_id(mut self, machine_id: Option<i32>) -> Self {
+        self.machine_id = machine_id;
         self
     }
 
@@ -50,12 +50,11 @@ impl<'a> Builder<'a> {
         };
 
         let machine_id = if let Some(machine_id) = self.machine_id {
-            match machine_id() {
-                Ok(machine_id) => machine_id,
-                Err(e) => return Err(SnowflakeError::MachineIdFailed(e)),
-            }
+            machine_id
         } else {
-            0_i16
+            return Err(SnowflakeError::MachineIdFailed(BoxDynError::from(
+                "machine_id is none",
+            )));
         };
 
         Ok(ShareSnowFlake::new(Snowflake {

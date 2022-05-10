@@ -2,9 +2,9 @@ mod builder;
 mod error;
 mod snowflake;
 
-pub use crate::snowflake::{CopySnowFlake, ShareSnowFlake};
 pub use crate::builder::Builder;
 pub use crate::error::BoxDynError;
+pub use crate::snowflake::{CopySnowFlake, ShareSnowFlake};
 
 pub trait IdGenerator {
     fn next_id(share_snowflake: &ShareSnowFlake) -> i64;

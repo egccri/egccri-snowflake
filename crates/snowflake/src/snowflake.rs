@@ -14,7 +14,7 @@ pub(crate) struct Internals {
 #[derive(Debug)]
 pub(crate) struct Snowflake {
     pub(crate) start_time: i64,
-    pub(crate) machine_id: i16,
+    pub(crate) machine_id: i32,
     pub(crate) internals: Mutex<Internals>,
 }
 

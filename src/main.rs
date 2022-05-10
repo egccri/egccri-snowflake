@@ -3,16 +3,18 @@ mod generator;
 mod server;
 
 use clap::Parser;
-use tonic::transport::Server;
-use server::grpc::SnowflakeGrpcService;
 use server::grpc::snowflake_grpc::snowflake_service_server::SnowflakeServiceServer;
+use server::grpc::SnowflakeGrpcService;
+use tonic::transport::Server;
+use crate::generator::leaf::leaf_snowflake::LeafSnowflake;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // generator::snowflake::snowflake_zookeeper_holder::init();
+
+    let service = LeafSnowflake::new();
 
     let addr = "[::1]:50051".parse()?;
-    let snowflake_service = SnowflakeGrpcService::default();
+    let snowflake_service = SnowflakeGrpcService::new(service);
 
     Server::builder()
         .add_service(SnowflakeServiceServer::new(snowflake_service))
@@ -20,7 +22,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     Ok(())
-
 
     // let args = Args::parse();
     // println!("{:?}", args);

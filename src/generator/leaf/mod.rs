@@ -1,4 +1,4 @@
-mod leaf_snowflake;
+pub mod leaf_snowflake;
 mod snowflake_zookeeper_holder;
 
 pub(crate) const TIMESTAMP_UNIT_MS: i16 = 1;
