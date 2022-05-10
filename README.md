@@ -11,9 +11,21 @@
 
 #### Features
 
-[*] custom snowflake
-[*] leaf snowflake
-[*] grpc endpoint
-[ ] http endpoint
-[ ] 人体工学配置
-[ ] 单请求多id生成
+- [x] custom snowflake
+- [x] leaf snowflake
+- [x] grpc endpoint
+- [ ] http endpoint
+- [ ] 人体工学配置
+- [ ] 单请求多id生成
+
+#### Zookeeper 节点信息
+
+```
+/snowflake/com.egccri.meta/forever
+/snowflake/com.egccri.meta/forever/127.0.0.1:50051-0000000000
+/snowflake/com.egccri.meta/forever/127.0.0.1:50052-0000000001
+```
+
+#### 链接
+
+https://tech.meituan.com/2017/04/21/mt-leaf.html
